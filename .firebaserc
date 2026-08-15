@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "smart-home-monitoring-sy-48629"
+  },
+  "targets": {
+    "smart-home-monitoring-sy-48629": {
+      "hosting": {
+        "app": [
+          "smart-home-monitoring-sy-48629"
+        ],
+        "hardware-simulator": [
+          "smart-home-hardware-simulator"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

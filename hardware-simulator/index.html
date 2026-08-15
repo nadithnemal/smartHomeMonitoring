@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Home Hardware Simulator</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f4f7fb;
+      color: #1f2937;
+    }
+
+    header {
+      padding: 24px;
+      color: white;
+      background: linear-gradient(135deg, #3730a3, #2563eb);
+    }
+
+    header h1 {
+      margin: 0 0 8px;
+      font-size: 26px;
+    }
+
+    header p {
+      margin: 0;
+      opacity: 0.9;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 24px;
+    }
+
+    .summary {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .summary-card {
+      flex: 1;
+      min-width: 150px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: white;
+      padding: 16px 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .summary-label {
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .summary-number {
+      color: #4338ca;
+      font-size: 25px;
+      font-weight: bold;
+    }
+
+    .floor-title {
+      margin: 30px 0 14px;
+    }
+
+    .device-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(225px, 1fr));
+      gap: 16px;
+    }
+
+    .device-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background: white;
+      padding: 18px;
+      border-radius: 14px;
+      border-left: 6px solid #9ca3af;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .device-card.on {
+      border-left-color: #16a34a;
+    }
+
+    .device-card.error {
+      border-left-color: #dc2626;
+    }
+
+    .device-card.disconnected {
+      border-left-color: #f97316;
+    }
+
+    .device-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .device-icon {
+      flex-shrink: 0;
+      width: 46px;
+      height: 46px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: #eef2ff;
+      color: #4338ca;
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+
+    .device-meta {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .device-name {
+      margin: 0;
+      font-size: 17px;
+      overflow-wrap: anywhere;
+    }
+
+    .room {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .details {
+      flex: 1;
+      margin: 15px 0;
+      color: #4b5563;
+      font-size: 13px;
+    }
+
+    .status {
+      align-self: flex-start;
+      padding: 5px 10px;
+      border-radius: 20px;
+      background: #e5e7eb;
+      color: #374151;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status.on {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .status.error {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .status.disconnected {
+      background: #ffedd5;
+      color: #c2410c;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 14px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      background: #4338ca;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #3730a3;
+    }
+
+    button:disabled {
+      cursor: not-allowed;
+      background: #9ca3af;
+    }
+
+    .switch-list {
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .switch-row button {
+      width: auto;
+      margin-top: 0;
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .alert {
+      display: none;
+      margin-bottom: 18px;
+      padding: 14px;
+      border-radius: 10px;
+      color: #991b1b;
+      background: #fee2e2;
+      border: 1px solid #fca5a5;
+      font-weight: bold;
+    }
+
+    .connection {
+      margin-top: 10px;
+      color: #bbf7d0;
+      font-size: 14px;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 20px;
+      padding: 14px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .toolbar input {
+      flex: 1;
+      min-width: 180px;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .toolbar button {
+      width: auto;
+      margin-top: 0;
+      padding: 10px 16px;
+    }
+
+    .add-panel {
+      display: none;
+      margin-bottom: 20px;
+      padding: 18px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .form-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .form-row label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+      min-width: 140px;
+      font-size: 13px;
+      color: #4b5563;
+      font-weight: bold;
+    }
+
+    .form-row input,
+    .form-row select {
+      width: 100%;
+      padding: 9px 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: normal;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .form-actions button {
+      width: auto;
+      margin-top: 0;
+      padding: 10px 18px;
+    }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+
+    .delete-device {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      width: auto;
+      margin: 0;
+      padding: 2px 6px;
+      background: none;
+      color: #9ca3af;
+      font-size: 15px;
+      line-height: 1;
+    }
+
+    .delete-device:hover {
+      background: none;
+      color: #dc2626;
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <h1>Smart Home Hardware Simulator</h1>
+  <p>Live physical-device simulation connected to Firebase</p>
+  <div id="connection" class="connection">Connecting to Firebase...</div>
+</header>
+
+<main>
+  <div id="safetyAlert" class="alert"></div>
+
+  <section class="summary">
+    <div class="summary-card">
+      <div class="summary-label">Total Devices</div>
+      <span id="totalDevices" class="summary-number">0</span>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">Devices ON</div>
+      <span id="devicesOn" class="summary-number">0</span>
+    </div>
+
+    <div class="summary-card">
+      <div class="summary-label">Safety Status</div>
+      <span id="safetyStatus" class="summary-number">Safe</span>
+    </div>
+  </section>
+
+  <div class="toolbar">
+    <input id="newFloorName" type="text" placeholder="New floor name (e.g. Second Floor)" />
+    <button id="addFloorBtn" type="button">+ Add Floor</button>
+    <button id="toggleAddDeviceBtn" type="button">+ Add Device</button>
+  </div>
+
+  <div id="addDevicePanel" class="add-panel">
+    <div class="form-row">
+      <label>
+        Floor
+        <select id="addDeviceFloor"></select>
+      </label>
+      <label>
+        Type
+        <select id="addDeviceType">
+          <option value="Light">Light</option>
+          <option value="Outlet">Outlet</option>
+          <option value="Multi-switch">Multi-switch</option>
+          <option value="Safety device">Safety device</option>
+          <option value="Camera">Camera</option>
+        </select>
+      </label>
+      <label>
+        Name
+        <input id="addDeviceName" type="text" placeholder="e.g. Garage Light" />
+      </label>
+      <label>
+        Room
+        <input id="addDeviceRoom" type="text" placeholder="e.g. Garage" />
+      </label>
+    </div>
+    <div class="form-row" id="switchesField" style="display: none;">
+      <label>
+        Switch names (comma-separated)
+        <input id="addDeviceSwitches" type="text" placeholder="e.g. Fridge Outlet, Counter Lights" />
+      </label>
+    </div>
+    <div class="form-actions">
+      <button id="saveDeviceBtn" type="button">Save Device</button>
+      <button id="cancelDeviceBtn" type="button" class="btn-secondary">Cancel</button>
+    </div>
+  </div>
+
+  <div id="floorContainer"></div>
+</main>
+
+<script>
+  const databaseUrl =
+    "https://smart-home-monitoring-sy-48629-default-rtdb.asia-southeast1.firebasedatabase.app";
+
+  const ironTimers = {};
+
+  let floorsCache = [];
+
+  const icons = {
+    Light: "LIGHT",
+    Outlet: "POWER",
+    Camera: "CAMERA",
+    "Multi-switch": "SWITCH",
+    "Safety device": "SAFETY"
+  };
+
+  function statusClass(status) {
+    if (status === "ON") return "on";
+    if (status === "ERROR") return "error";
+    if (status === "DISCONNECTED") return "disconnected";
+    return "";
+  }
+
+  async function updateDevice(deviceId, values) {
+    const response = await fetch(
+      `${databaseUrl}/devices/${deviceId}.json`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values)
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Could not update device");
+    }
+  }
+
+  function startIronTimer(device) {
+    if (device.type !== "Safety device" || device.status !== "ON") return;
+    if (ironTimers[device.id]) return;
+
+    const seconds = device.maxOnDurationSeconds || 30;
+    ironTimers[device.id] = setTimeout(async () => {
+      await updateDevice(device.id, {
+        status: "OFF",
+        safetyAlert:
+          `Safety alert: ${device.name} was automatically turned OFF after ${seconds} seconds.`,
+        safetyTriggeredAt: Date.now(),
+        updatedAt: Date.now()
+      });
+
+      delete ironTimers[device.id];
+      loadAll();
+    }, seconds * 1000);
+  }
+
+  async function controlDevice(device) {
+    if (device.type === "Camera") {
+      alert(`Mock camera feed opened for ${device.name}`);
+      return;
+    }
+
+    if (device.status === "ERROR" || device.status === "DISCONNECTED") {
+      alert(`${device.name} cannot be controlled.`);
+      return;
+    }
+
+    // Multi-switch units don't have a single ON/OFF - each sub-switch is
+    // controlled individually via toggleSubSwitch().
+    if (device.type === "Multi-switch") return;
+
+    const newStatus = device.status === "ON" ? "OFF" : "ON";
+
+    const values = {
+      status: newStatus,
+      updatedAt: Date.now()
+    };
+
+    if (device.type === "Safety device" && newStatus === "ON") {
+      values.maxOnDurationSeconds = device.maxOnDurationSeconds || 30;
+      values.activatedAt = Date.now();
+    }
+
+    await updateDevice(device.id, values);
+
+    if (device.type === "Safety device" && newStatus === "OFF" && ironTimers[device.id]) {
+      clearTimeout(ironTimers[device.id]);
+      delete ironTimers[device.id];
+    }
+
+    loadAll();
+  }
+
+  async function toggleSubSwitch(deviceId, switchId, turnOn) {
+    const response = await fetch(
+      `${databaseUrl}/devices/${deviceId}/switches/${switchId}.json`,
+      {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: turnOn ? "ON" : "OFF" })
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Could not update switch");
+    }
+
+    loadAll();
+  }
+
+  function createDeviceCard(device) {
+    const card = document.createElement("article");
+    card.className = `device-card ${statusClass(device.status)}`;
+
+    const isCamera = device.type === "Camera";
+    const isMultiSwitch = device.type === "Multi-switch";
+    const canControl =
+      device.status !== "ERROR" && device.status !== "DISCONNECTED";
+
+    let controlHtml;
+
+    if (isMultiSwitch) {
+      const switches = device.switches || {};
+      const switchIds = Object.keys(switches).sort();
+
+      controlHtml = `
+        <div class="switch-list">
+          ${switchIds
+            .map((switchId) => {
+              const sw = switches[switchId];
+              const on = sw.status === "ON";
+              return `
+                <div class="switch-row">
+                  <span>${sw.name}</span>
+                  <button
+                    data-switch-id="${switchId}"
+                    ${!canControl ? "disabled" : ""}
+                  >
+                    ${on ? "Turn OFF" : "Turn ON"}
+                  </button>
+                </div>
+              `;
+            })
+            .join("")}
+        </div>
+      `;
+    } else {
+      controlHtml = `
+        <button ${!isCamera && !canControl ? "disabled" : ""}>
+          ${isCamera ? "Open Mock Camera" :
+            device.status === "ON" ? "Turn OFF" : "Turn ON"}
+        </button>
+      `;
+    }
+
+    card.innerHTML = `
+      <div class="device-top">
+        <div class="device-icon">${icons[device.type] || "DEVICE"}</div>
+        <div class="device-meta">
+          <h3 class="device-name">${device.name}</h3>
+          <div class="room">${device.room}</div>
+        </div>
+      </div>
+
+      <p class="details">${device.details || "No details available"}</p>
+
+      <span class="status ${statusClass(device.status)}">
+        ${isCamera ? "VIEW FEED" : device.status}
+      </span>
+
+      ${controlHtml}
+    `;
+
+    if (isMultiSwitch) {
+      card.querySelectorAll("button[data-switch-id]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const switchId = btn.getAttribute("data-switch-id");
+          const currentlyOn = switches_status(device, switchId) === "ON";
+          toggleSubSwitch(device.id, switchId, !currentlyOn);
+        });
+      });
+    } else {
+      card.querySelector("button").addEventListener("click", () => {
+        controlDevice(device);
+      });
+    }
+
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "delete-device";
+    removeBtn.textContent = "✕";
+    removeBtn.title = "Remove device";
+    removeBtn.addEventListener("click", () => {
+      deleteDevice(device.id);
+    });
+    card.appendChild(removeBtn);
+
+    return card;
+  }
+
+  function switches_status(device, switchId) {
+    return device.switches && device.switches[switchId]
+      ? device.switches[switchId].status
+      : "OFF";
+  }
+
+  function render(floors, devices) {
+    const container = document.getElementById("floorContainer");
+    container.innerHTML = "";
+
+    document.getElementById("totalDevices").textContent = devices.length;
+    document.getElementById("devicesOn").textContent =
+      devices.filter((device) => device.status === "ON").length;
+
+    const activeSafety = devices.find(
+      (device) => device.type === "Safety device" && device.status === "ON"
+    );
+    document.getElementById("safetyStatus").textContent = activeSafety
+      ? "Active"
+      : "Safe";
+
+    const alertBox = document.getElementById("safetyAlert");
+    const alertDevice = devices.find((device) => device.safetyAlert);
+
+    if (alertDevice) {
+      alertBox.textContent = alertDevice.safetyAlert;
+      alertBox.style.display = "block";
+    } else {
+      alertBox.style.display = "none";
+    }
+
+    floors.forEach((floor) => {
+      const block = document.createElement("div");
+      block.className = "floor-block";
+
+      const title = document.createElement("h2");
+      title.className = "floor-title";
+      title.textContent = floor.name;
+      block.appendChild(title);
+
+      const grid = document.createElement("section");
+      grid.className = "device-grid";
+
+      devices.forEach((device) => {
+        if (Number(device.floor) !== Number(floor.index)) return;
+
+        startIronTimer(device);
+        grid.appendChild(createDeviceCard(device));
+      });
+
+      block.appendChild(grid);
+      container.appendChild(block);
+    });
+  }
+
+  function populateFloorSelect(floors) {
+    const select = document.getElementById("addDeviceFloor");
+    select.innerHTML = floors
+      .map((floor) => `<option value="${floor.index}">${floor.name}</option>`)
+      .join("");
+    if (floors.length) {
+      select.value = String(floors[0].index);
+    }
+  }
+
+  async function loadAll() {
+    try {
+      const [floorsResponse, devicesResponse] = await Promise.all([
+        fetch(`${databaseUrl}/floors.json`),
+        fetch(`${databaseUrl}/devices.json`)
+      ]);
+
+      const floorsData = await floorsResponse.json();
+      const data = await devicesResponse.json();
+
+      let floors;
+      if (floorsData && Object.keys(floorsData).length) {
+        floors = Object.entries(floorsData)
+          .map(([key, value]) => ({
+            key,
+            name: value.name || `Floor ${Number(key)}`,
+            index: value.index ?? Number(String(key).replace(/\D/g, "")),
+            sortOrder: value.sortOrder ?? Number(String(key).replace(/\D/g, ""))
+          }))
+          .sort(
+            (a, b) =>
+              Number(a.sortOrder ?? a.index) - Number(b.sortOrder ?? b.index)
+          );
+      } else {
+        const defaults = {
+          "floor_0": { name: "Ground Floor", index: 0, sortOrder: 0 },
+          "floor_1": { name: "First Floor", index: 1, sortOrder: 1 }
+        };
+        await fetch(`${databaseUrl}/floors.json`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(defaults)
+        });
+        floors = Object.entries(defaults).map(([key, value]) => ({
+          key,
+          name: value.name,
+          index: value.index,
+          sortOrder: value.sortOrder
+        }));
+      }
+
+      floorsCache = floors;
+
+      const devices = Object.entries(data || {}).map(([id, values]) => {
+        const device = { id, ...values };
+
+        if (device.type === "Multi-switch" && device.switches) {
+          const switchStatuses = Object.values(device.switches).map(
+            (sw) => sw.status
+          );
+
+          if (device.status !== "ERROR" && device.status !== "DISCONNECTED") {
+            device.status = switchStatuses.includes("ON") ? "ON" : "OFF";
+          }
+        }
+
+        return device;
+      });
+
+      render(floors, devices);
+      populateFloorSelect(floors);
+
+      document.getElementById("connection").textContent =
+        "Connected to Firebase - live device updates enabled";
+    } catch (error) {
+      document.getElementById("connection").textContent =
+        `Connection error: ${error.message}`;
+    }
+  }
+
+  async function addFloor(name) {
+    const nextIndex = floorsCache.length
+      ? Math.max(...floorsCache.map((floor) => floor.index)) + 1
+      : 0;
+
+    const floor = { name, index: nextIndex, sortOrder: nextIndex };
+    const response = await fetch(`${databaseUrl}/floors/floor_${nextIndex}.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(floor)
+    });
+
+    if (!response.ok) {
+      alert("Could not add floor");
+      return;
+    }
+
+    document.getElementById("newFloorName").value = "";
+    loadAll();
+  }
+
+  async function addDevice() {
+    const name = document.getElementById("addDeviceName").value.trim();
+    const room = document.getElementById("addDeviceRoom").value.trim();
+    const floor = Number(document.getElementById("addDeviceFloor").value);
+    const type = document.getElementById("addDeviceType").value;
+
+    if (!name || !room) {
+      alert("Device name and room are required.");
+      return;
+    }
+
+    const id = `device_${Date.now()}`;
+    const values = {
+      name,
+      room,
+      type,
+      floor,
+      status: "OFF",
+      updatedAt: Date.now()
+    };
+
+    if (type === "Multi-switch") {
+      const switchNames = document
+        .getElementById("addDeviceSwitches")
+        .value.split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+
+      if (!switchNames.length) {
+        alert("Enter at least one switch name.");
+        return;
+      }
+
+      const switches = {};
+      switchNames.forEach((switchName, i) => {
+        switches[`sw${i + 1}`] = { name: switchName, status: "OFF" };
+      });
+
+      values.switches = switches;
+      values.details = `${switchNames.length} individual switch${switchNames.length > 1 ? "es" : ""}`;
+    } else if (type === "Camera") {
+      values.details = "Mock camera feed available";
+    } else if (type === "Safety device") {
+      values.details = "Auto-off after 30 seconds";
+    }
+
+    const response = await fetch(`${databaseUrl}/devices/${id}.json`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values)
+    });
+
+    if (!response.ok) {
+      alert("Could not add device");
+      return;
+    }
+
+    document.getElementById("addDeviceName").value = "";
+    document.getElementById("addDeviceRoom").value = "";
+    document.getElementById("addDeviceSwitches").value = "";
+    document.getElementById("addDevicePanel").style.display = "none";
+    loadAll();
+  }
+
+  async function deleteDevice(deviceId) {
+    if (!confirm(`Remove device "${deviceId}"?`)) return;
+
+    const response = await fetch(`${databaseUrl}/devices/${deviceId}.json`, {
+      method: "DELETE"
+    });
+
+    if (!response.ok) {
+      alert("Could not remove device");
+      return;
+    }
+
+    loadAll();
+  }
+
+  document.getElementById("addFloorBtn").addEventListener("click", () => {
+    const name = document.getElementById("newFloorName").value.trim();
+    if (!name) {
+      alert("Enter a floor name.");
+      return;
+    }
+    addFloor(name);
+  });
+
+  document.getElementById("toggleAddDeviceBtn").addEventListener("click", () => {
+    const panel = document.getElementById("addDevicePanel");
+    panel.style.display = panel.style.display === "none" ? "block" : "none";
+  });
+
+  document.getElementById("saveDeviceBtn").addEventListener("click", addDevice);
+
+  document.getElementById("cancelDeviceBtn").addEventListener("click", () => {
+    document.getElementById("addDevicePanel").style.display = "none";
+  });
+
+  document.getElementById("addDeviceType").addEventListener("change", (event) => {
+    document.getElementById("switchesField").style.display =
+      event.target.value === "Multi-switch" ? "flex" : "none";
+  });
+
+  loadAll();
+  setInterval(loadAll, 2000);
+</script>
+</body>
+</html>
