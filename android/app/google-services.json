@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "835024232739",
+    "firebase_url": "https://smart-home-monitoring-sy-48629-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "smart-home-monitoring-sy-48629",
+    "storage_bucket": "smart-home-monitoring-sy-48629.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835024232739:android:3ec383553cfd58080c2c96",
+        "android_client_info": {
+          "package_name": "com.example.smart_home_monitor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDta45QuAqA16nVEIATiVB9Szmzz0lAmrg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

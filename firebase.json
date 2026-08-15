@@ -1,0 +1,92 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "smart-home-monitoring-sy-48629",
+          "appId": "1:835024232739:android:3ec383553cfd58080c2c96",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "smart-home-monitoring-sy-48629",
+          "configurations": {
+            "android": "1:835024232739:android:3ec383553cfd58080c2c96",
+            "ios": "1:835024232739:ios:26e4f58cad671a1d0c2c96",
+            "macos": "1:835024232739:ios:26e4f58cad671a1d0c2c96",
+            "web": "1:835024232739:web:126c75040492ba0e0c2c96",
+            "windows": "1:835024232739:web:2c8fdbc042b9e5460c2c96"
+          }
+        }
+      }
+    }
+  },
+  "hosting": [
+    {
+      "target": "app",
+      "public": "build/web",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    {
+      "target": "hardware-simulator",
+      "public": "hardware-simulator",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ]
+    }
+  ],
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "disallowLegacyRuntimeConfig": true,
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        "*.local"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run lint"
+      ]
+    }
+  ],
+  "emulators": {
+    "functions": {
+      "port": 5001,
+      "host": "0.0.0.0"
+    },
+    "database": {
+      "port": 9000,
+      "host": "0.0.0.0"
+    },
+    "hosting": {
+      "port": 5000,
+      "host": "0.0.0.0"
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
+  }
+}
